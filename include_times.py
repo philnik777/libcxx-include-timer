@@ -43,7 +43,7 @@ for header in headers:
 
   for cxx_version in cxx_versions:
     printerr(f"Benchmarking <{header}>/{cxx_version}" + 20 * " ", end="\r")
-    command = f"clang++ -std={cxx_version} -D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES -nostdinc++ {include_paths} ./testfile.cpp -c"
+    command = f"clang++-18 -std={cxx_version} -D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES -nostdinc++ {include_paths} ./testfile.cpp -c"
     print(f"{time_command(command)}", end="\n" if cxx_version == "c++26" else ",")
 
 print(f"Overall time: {int((time.time() - program_time) / 60)}")
