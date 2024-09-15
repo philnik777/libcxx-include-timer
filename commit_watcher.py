@@ -2,7 +2,7 @@ import os
 import time
 import subprocess
 
-CMakeCommand = 'CC=clang CXX=clang++ cmake -G Ninja -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" ../runtimes'
+CMakeCommand = 'CC=clang-18 CXX=clang++-18 cmake -G Ninja -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" ../runtimes'
 
 def run_command(command : str) -> str:
   result = subprocess.run(command, shell=True, stdout=subprocess.PIPE)
