@@ -1,12 +1,8 @@
 import os
 import time
-import subprocess
+from utils import run_command
 
 CMakeCommand = 'CC=clang-18 CXX=clang++-18 cmake -G Ninja -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" ../runtimes'
-
-def run_command(command : str) -> str:
-  result = subprocess.run(command, shell=True, stdout=subprocess.PIPE)
-  return result.stdout.decode("utf-8")
 
 while True:
   os.system("(cd repo && git fetch)")
@@ -18,7 +14,7 @@ while True:
   for commit in commits[::-1]:
     print(f"Checking commit {commit}")
     os.system(f"(cd repo && git checkout {commit})")
-    if os.system(f"(cd repo && rm -rf build/ && mkdir build && cd build && {CMakeCommand} && ninja)") != 0:
+    if os.system(f"(cd repo && rm -rf build/ && mkdir build && cd build && {CMakeCommand} && ninja generate-cxx-headers)") != 0:
       print("libc++ build failed!")
     else:
       os.system(f"python include_times.py > ../include_time_db/{commit}")
