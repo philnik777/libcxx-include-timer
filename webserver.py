@@ -101,33 +101,45 @@ def table_to_html_table(table : Data) -> str:
   return out
 
 class MyServer(BaseHTTPRequestHandler):
+  def main_page_response(self):
+      self.send_response(200)
+      self.send_header("Content-type", "text/html")
+      self.end_headers()
+      recent_commits = run_command(recent_commits_command).splitlines()
+
+      recent_commits_list = "<table>"
+      header_generated = False
+
+      for (first_commit, second_commit) in zip(recent_commits, recent_commits[1:]):
+        try:
+          with open(f"../include_time_db/{first_commit}", "r") as file:
+            fc_content = Data(data_to_table(file.read()))
+            if not header_generated:
+              recent_commits_list += to_html_row("commit", fc_content.header[1:])
+              header_generated = True
+          with open(f"../include_time_db/{second_commit}", "r") as file:
+            sc_content = Data(data_to_table(file.read()))
+          recent_commits_list += to_html_row(first_commit, table_diff(accumulate_table(sc_content), accumulate_table(fc_content)).rows[0])
+        except FileNotFoundError:
+          pass
+        except IndexError:
+          pass
+
+      recent_commits_list += "</table>"
+
+      self.wfile.write(bytes(f"<!DOCTYPE html><html>{header}{body.format(commits=recent_commits_list)}</html>", "utf-8"))
+
+  def detailed_commit_info(self):
+    self.wfile.write(bytes(f"<!DOCTYPE html><html>{header}{body}</html>", "utf-8"))
+
+  def invalid_response(self):
+    self.send_response(404)
+
   def do_GET(self):
-    self.send_response(200)
-    self.send_header("Content-type", "text/html")
-    self.end_headers()
-    recent_commits = run_command(recent_commits_command).splitlines()
-
-    recent_commits_list = "<table>"
-    header_generated = False
-
-    for (first_commit, second_commit) in zip(recent_commits, recent_commits[1:]):
-      try:
-        with open(f"../include_time_db/{first_commit}", "r") as file:
-          fc_content = Data(data_to_table(file.read()))
-          if not header_generated:
-            recent_commits_list += to_html_row("commit", fc_content.header[1:])
-            header_generated = True
-        with open(f"../include_time_db/{second_commit}", "r") as file:
-          sc_content = Data(data_to_table(file.read()))
-        recent_commits_list += to_html_row(first_commit, table_diff(accumulate_table(sc_content), accumulate_table(fc_content)).rows[0])
-      except FileNotFoundError:
-        pass
-      except IndexError:
-        pass
-
-    recent_commits_list += "</table>"
-
-    self.wfile.write(bytes(f"<!DOCTYPE html><html>{header}{body.format(commits=recent_commits_list)}</html>", "utf-8"))
+    if self.path in ['/', 'index.html']:
+      self.main_page_response()
+    else:
+      self.invalid_response()
 
 if __name__ == "__main__":
   webserver = HTTPServer((hostname, port), MyServer)
