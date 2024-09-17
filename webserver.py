@@ -138,7 +138,8 @@ class MyServer(BaseHTTPRequestHandler):
 
   def detailed_commit_info(self, commits : str):
     commits = commits.split('/')
-    if len(commits) != 2 or "{:x}".format(int(commits[0], 16)) != commits[0] or "{:x}".format(int(commits[1], 16)) != commits[1]:
+    if len(commits) != 2 or "{:0>40x}".format(int(commits[0], 16)) != commits[0] or "{:0>40x}".format(int(commits[1], 16)) != commits[1]:
+      print(f"Invalid commits: {commits}, {f1}, {f2}")
       self.send_response(404)
       return
 
