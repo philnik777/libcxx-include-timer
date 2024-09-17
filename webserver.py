@@ -86,7 +86,11 @@ def to_html_row(name, row) -> str:
 
   return out
 
-def table_to_html_table(table : Data) -> str:
+def load_table(commit : str) -> Data:
+  file = open(f"../include_time_db/{commit}", "r")
+  return Data(data_to_table(file.read()))
+
+def to_html_table(table : Data) -> str:
   out = "<table>"
 
   out += "<tr class=\"tr_sub\">"
@@ -112,14 +116,17 @@ class MyServer(BaseHTTPRequestHandler):
 
       for (first_commit, second_commit) in zip(recent_commits, recent_commits[1:]):
         try:
-          with open(f"../include_time_db/{first_commit}", "r") as file:
-            fc_content = Data(data_to_table(file.read()))
-            if not header_generated:
-              recent_commits_list += to_html_row("commit", fc_content.header[1:])
-              header_generated = True
-          with open(f"../include_time_db/{second_commit}", "r") as file:
-            sc_content = Data(data_to_table(file.read()))
-          recent_commits_list += to_html_row(first_commit, table_diff(accumulate_table(sc_content), accumulate_table(fc_content)).rows[0])
+          fc_content = load_table(first_commit)
+
+          if not header_generated:
+            recent_commits_list += to_html_row("commit", fc_content.header[1:])
+            header_generated = True
+
+          sc_content = load_table(second_commit)
+
+          data = table_diff(accumulate_table(sc_content), accumulate_table(fc_content)).rows[0]
+          data.append(f"<a href=\"/diff/{second_commit}/{first_commit}\">details</a>")
+          recent_commits_list += to_html_row(first_commit, data)
         except FileNotFoundError:
           pass
         except IndexError:
@@ -129,15 +136,24 @@ class MyServer(BaseHTTPRequestHandler):
 
       self.wfile.write(bytes(f"<!DOCTYPE html><html>{header}{body.format(commits=recent_commits_list)}</html>", "utf-8"))
 
-  def detailed_commit_info(self):
-    self.wfile.write(bytes(f"<!DOCTYPE html><html>{header}{body}</html>", "utf-8"))
+  def detailed_commit_info(self, commits : str):
+    commits = commits.split('/')
+    if len(commits) != 2 or "{:x}".format(int(commits[0], 16)) != commits[0] or "{:x}".format(int(commits[1], 16)) != commits[1]:
+      self.send_response(404)
+      return
+
+    commit_info = to_html_table(table_diff(load_table(commits[0]), load_table(commits[1])))
+
+    self.wfile.write(bytes(f"<!DOCTYPE html><html>{header}{body.format(commits=commit_info)}</html>", "utf-8"))
 
   def invalid_response(self):
     self.send_response(404)
 
   def do_GET(self):
-    if self.path in ['/', 'index.html']:
+    if self.path in ['/', '/index.html']:
       self.main_page_response()
+    elif self.path.startswith('/diff/'):
+      self.detailed_commit_info(self.path.removeprefix('/diff/'))
     else:
       self.invalid_response()
 
