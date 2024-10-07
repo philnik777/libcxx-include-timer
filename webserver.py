@@ -2,6 +2,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import copy
 import time
 import os
+import re
 from utils import run_command
 
 hostname = ""
@@ -126,7 +127,8 @@ class MyServer(BaseHTTPRequestHandler):
 
           data = table_diff(accumulate_table(sc_content), accumulate_table(fc_content)).rows[0]
           data.append(f"<a href=\"/diff/{second_commit}/{first_commit}\">details</a>")
-          recent_commits_list += to_html_row(first_commit, data)
+          commit_str = "<code><a href=\"https://github.com/llvm/llvm-project/commit/{0}\">{0}</a></code>".format(first_commit)
+          recent_commits_list += to_html_row(commit_str, data)
         except FileNotFoundError:
           pass
         except IndexError:
