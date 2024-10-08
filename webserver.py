@@ -19,6 +19,16 @@ header = """
   .tr_sub:nth-child(even) {
     background-color: #D6EEEE;
   }
+
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-color: grey;
+    }
+
+    .tr_sub:nth-child(even) {
+      background-color: #AAAAAA;
+    }
+  }
   </style>
 </head>
 """
