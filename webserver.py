@@ -154,6 +154,10 @@ class MyServer(BaseHTTPRequestHandler):
   def raw(self, file : str):
     file = file.removeprefix("/raw/")
 
+    self.send_response(200)
+    self.send_header("Content-type", "text/plain")
+    self.end_headers()
+
     if (file.startswith("latest_commits/")):
       self.wfile.write(get_recent_commits_string(int(file.removeprefix("latest_commits/"))).encode())
       return
