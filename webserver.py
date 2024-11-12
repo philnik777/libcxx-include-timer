@@ -3,7 +3,7 @@ import copy
 import time
 import os
 import re
-from utils import run_command
+from utils import run_command, get_recent_commits, load_table, Data, headers
 
 hostname = ""
 port = 80
@@ -42,21 +42,6 @@ body = """
 
 recent_commits_command = "(cd repo && git rev-list --max-count=50 HEAD -- libcxx/)"
 
-class Data:
-
-  def __init__(self, table : [[str]]):
-    self.header = []
-    self.row_names = []
-    self.rows = []
-
-    self.header = table[0]
-    for row in table[1:]:
-      self.row_names.append(row[0])
-      a_row = []
-      for el in row[1:]:
-        a_row.append(int(el))
-      self.rows.append(a_row)
-
 def accumulate_table(table : Data) -> Data:
   out = Data([table.header])
   out.row_names = ["Accumulated"]
@@ -80,14 +65,6 @@ def table_diff(lhs : Data, rhs : Data) -> Data:
 
   return out
 
-def data_to_table(table : str) -> [[str]]:
-  out = []
-
-  for row in table.splitlines():
-    out.append(row.split(','))
-
-  return out
-
 def to_html_row(name, row) -> str:
   out = "<tr class=\"tr_sub\">"
   out += f"<th>{name}</th>"
@@ -96,10 +73,6 @@ def to_html_row(name, row) -> str:
   out += "</tr>"
 
   return out
-
-def load_table(commit : str) -> Data:
-  file = open(f"../include_time_db/{commit}", "r")
-  return Data(data_to_table(file.read()))
 
 def to_html_table(table : Data) -> str:
   out = "<table>"
@@ -120,7 +93,7 @@ class MyServer(BaseHTTPRequestHandler):
       self.send_response(200)
       self.send_header("Content-type", "text/html")
       self.end_headers()
-      recent_commits = run_command(recent_commits_command).splitlines()
+      recent_commits = get_recent_commits(50)
 
       recent_commits_list = "<table>"
       header_generated = False
@@ -159,6 +132,24 @@ class MyServer(BaseHTTPRequestHandler):
 
     self.wfile.write(bytes(f"<!DOCTYPE html><html>{header}{body.format(commits=commit_info)}</html>", "utf-8"))
 
+  def dashboard(self):
+    body = ""
+    for file in sorted(os.listdir("../dashboard")):
+      file_name = file
+      body += f"<img src=\"/dashboard/{file_name}\">"
+    self.wfile.write(bytes(f"<!DOCTYPE html><html>{header}{body.format(commits=body)}</html>", "utf-8"))
+
+  def dashboard_png(self, pic : str):
+    pic = pic.removeprefix("/dashboard/")
+    if not pic.endswith(".png") or pic.removesuffix(".png") not in headers:
+      self.send_response(404)
+      return
+    print(pic)
+    self.send_response(200)
+    self.send_header("Content-type", "image/png")
+    self.end_headers()
+    self.wfile.write(open(f"../dashboard/{pic}", "rb").read())
+
   def invalid_response(self):
     self.send_response(404)
 
@@ -167,6 +158,10 @@ class MyServer(BaseHTTPRequestHandler):
       self.main_page_response()
     elif self.path.startswith('/diff/'):
       self.detailed_commit_info(self.path.removeprefix('/diff/'))
+    elif self.path in ["/dashboard", "/dashboard/"]:
+      self.dashboard()
+    elif self.path.startswith("/dashboard/"):
+      self.dashboard_png(self.path)
     else:
       self.invalid_response()
 
