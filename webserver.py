@@ -1,4 +1,5 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import argparse
 import copy
 import time
 import os
@@ -6,7 +7,6 @@ import re
 from utils import *
 
 hostname = ""
-port = 80
 
 header = """
 <head>
@@ -135,7 +135,7 @@ class MyServer(BaseHTTPRequestHandler):
 
   def dashboard(self):
     body = ""
-    for file in sorted(os.listdir("../dashboard")):
+    for file in sorted(os.listdir("dashboard")):
       file_name = file
       body += f"<img src=\"/dashboard/{file_name}\">"
     self.wfile.write(bytes(f"<!DOCTYPE html><html>{header}{body.format(commits=body)}</html>", "utf-8"))
@@ -149,7 +149,7 @@ class MyServer(BaseHTTPRequestHandler):
     self.send_response(200)
     self.send_header("Content-type", "image/png")
     self.end_headers()
-    self.wfile.write(open(f"../dashboard/{pic}", "rb").read())
+    self.wfile.write(open(f"dashboard/{pic}", "rb").read())
 
   def raw(self, file : str):
     file = file.removeprefix("/raw/")
@@ -166,7 +166,7 @@ class MyServer(BaseHTTPRequestHandler):
       commit = file.removeprefix("commit/")
       if not is_valid_commit(commit):
         return
-      self.wfile.write(open(f"../include_time_db/{commit}", "r").read().encode())
+      self.wfile.write(open(f"include_time_db/{commit}", "r").read().encode())
 
   def do_GET(self):
     if self.path in ['/', '/index.html']:
@@ -181,7 +181,11 @@ class MyServer(BaseHTTPRequestHandler):
       self.raw(self.path)
 
 if __name__ == "__main__":
-  webserver = HTTPServer((hostname, port), MyServer)
+  parser = argparse.ArgumentParser()
+  parser.add_argument("--port", default=80)
+  args = parser.parse_args()
+
+  webserver = HTTPServer((hostname, int(args.port)), MyServer)
   print("Server Started!")
 
   webserver.serve_forever()

@@ -29,7 +29,7 @@ def generate_time_plots():
     plt.plot(pd.DataFrame(by_version), label=name)
     plt.legend(by_version.keys())
     plt.title(name)
-    plt.savefig(f"../dashboard/{name}.png")
+    plt.savefig(f"dashboard/{name}.png")
     plt.close()
 
 while True:
@@ -45,7 +45,7 @@ while True:
     if os.system(f"(cd repo && rm -rf build/ && mkdir build && cd build && {CMakeCommand} && ninja generate-cxx-headers)") != 0:
       print("libc++ build failed!")
     else:
-      os.system(f"python include_times.py > ../include_time_db/{commit}")
+      os.system(f"python include_times.py > include_time_db/{commit}")
 
   if len(commits) != 0:
     generate_time_plots()

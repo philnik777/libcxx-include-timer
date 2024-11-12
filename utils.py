@@ -14,8 +14,8 @@ headers = ["algorithm", "any", "array", "atomic", "barrier", "bit", "bitset", "c
            "type_traits", "typeindex", "typeinfo", "unordered_map", "unordered_set", "utility", "valarray", "variant",
            "vector", "version"]
 
-def run_command(command : str) -> str:
-  result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, timeout=60)
+def run_command(command : str, timeout=60) -> str:
+  result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, timeout=timeout)
   return result.stdout.decode("utf-8")
 
 def get_recent_commits_string(count : int) -> str:
@@ -48,5 +48,5 @@ class Data:
       self.rows.append(a_row)
 
 def load_table(commit : str) -> Data:
-  file = open(f"../include_time_db/{commit}", "r")
+  file = open(f"include_time_db/{commit}", "r")
   return Data(data_to_table(file.read()))
