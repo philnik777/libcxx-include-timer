@@ -134,6 +134,9 @@ class MyServer(BaseHTTPRequestHandler):
     self.wfile.write(bytes(f"<!DOCTYPE html><html>{header}{body.format(commits=commit_info)}</html>", "utf-8"))
 
   def dashboard(self):
+    self.send_response(200)
+    self.send_header("Content-type", "text/html")
+    self.end_headers()
     body = ""
     for file in sorted(os.listdir("dashboard")):
       file_name = file
