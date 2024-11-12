@@ -18,8 +18,11 @@ def run_command(command : str) -> str:
   result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, timeout=60)
   return result.stdout.decode("utf-8")
 
+def get_recent_commits_string(count : int) -> str:
+  return run_command(f"(cd repo && git rev-list --max-count={count} HEAD -- libcxx/)")
+
 def get_recent_commits(count : int) -> [str]:
-  return run_command(f"(cd repo && git rev-list --max-count={count} HEAD -- libcxx/)").splitlines()
+  return get_recent_commits_string(count).splitlines()
 
 def data_to_table(table : str) -> [[str]]:
   out = []

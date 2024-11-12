@@ -3,7 +3,7 @@ import copy
 import time
 import os
 import re
-from utils import run_command, get_recent_commits, load_table, Data, headers
+from utils import *
 
 hostname = ""
 port = 80
@@ -39,8 +39,6 @@ body = """
   {commits}
 </body>
 """
-
-recent_commits_command = "(cd repo && git rev-list --max-count=50 HEAD -- libcxx/)"
 
 def accumulate_table(table : Data) -> Data:
   out = Data([table.header])
@@ -88,6 +86,9 @@ def to_html_table(table : Data) -> str:
   out += "</table>"
   return out
 
+def is_valid_commit(commit : str) -> bool:
+  return "{:0>40x}".format(int(commit, 16)) == commit
+
 class MyServer(BaseHTTPRequestHandler):
   def main_page_response(self):
       self.send_response(200)
@@ -123,7 +124,7 @@ class MyServer(BaseHTTPRequestHandler):
 
   def detailed_commit_info(self, commits : str):
     commits = commits.split('/')
-    if len(commits) != 2 or "{:0>40x}".format(int(commits[0], 16)) != commits[0] or "{:0>40x}".format(int(commits[1], 16)) != commits[1]:
+    if len(commits) != 2 or not is_valid_commit(commits[0]) or not is_valid_commit(commits[1]):
       print(f"Invalid commits: {commits}, {f1}, {f2}")
       self.send_response(404)
       return
@@ -150,8 +151,18 @@ class MyServer(BaseHTTPRequestHandler):
     self.end_headers()
     self.wfile.write(open(f"../dashboard/{pic}", "rb").read())
 
-  def invalid_response(self):
-    self.send_response(404)
+  def raw(self, file : str):
+    file = file.removeprefix("/raw/")
+
+    if (file.startswith("latest_commits/")):
+      self.wfile.write(get_recent_commits_string(int(file.removeprefix("latest_commits/"))).encode())
+      return
+
+    if (file.startswith("commit/")):
+      commit = file.removeprefix("commit/")
+      if not is_valid_commit(commit):
+        return
+      self.wfile.write(open(f"../include_time_db/{commit}", "r").read().encode())
 
   def do_GET(self):
     if self.path in ['/', '/index.html']:
@@ -162,8 +173,8 @@ class MyServer(BaseHTTPRequestHandler):
       self.dashboard()
     elif self.path.startswith("/dashboard/"):
       self.dashboard_png(self.path)
-    else:
-      self.invalid_response()
+    elif self.path.startswith("/raw/"):
+      self.raw(self.path)
 
 if __name__ == "__main__":
   webserver = HTTPServer((hostname, port), MyServer)
