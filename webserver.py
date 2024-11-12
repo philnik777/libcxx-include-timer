@@ -137,11 +137,11 @@ class MyServer(BaseHTTPRequestHandler):
     self.send_response(200)
     self.send_header("Content-type", "text/html")
     self.end_headers()
-    body = ""
+    images = ""
     for file in sorted(os.listdir("dashboard")):
       file_name = file
-      body += f"<img src=\"/dashboard/{file_name}\">"
-    self.wfile.write(bytes(f"<!DOCTYPE html><html>{header}{body.format(commits=body)}</html>", "utf-8"))
+      images += f"<img src=\"/dashboard/{file_name}\" style=\"width: 19vw\">"
+    self.wfile.write(bytes(f"<!DOCTYPE html><html>{header}{body.format(commits=images)}</html>", "utf-8"))
 
   def dashboard_png(self, pic : str):
     pic = pic.removeprefix("/dashboard/")
