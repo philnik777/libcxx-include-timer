@@ -1,5 +1,8 @@
 import subprocess
 
+wrapper_headers = ["cassert", "ccomplex", "cctype", "cerrno", "cfenv", "cfloat", "cinttypes", "ciso646", "climits",
+                   "clocale", "csetjmp", "csignal", "cstdarg", "cstdbool", "cstdint", "cstdio", "cstdlib", "cstring",
+                   "ctgmath", "ctime", "cuchar", "cwchar", "cwctype"]
 
 headers = ["algorithm", "any", "array", "atomic", "barrier", "bit", "bitset", "cassert", "ccomplex", "cctype", "cerrno",
            "cfenv", "cfloat", "charconv", "chrono", "cinttypes", "ciso646", "climits", "clocale", "cmath", "codecvt",

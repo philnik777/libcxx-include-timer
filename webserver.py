@@ -133,14 +133,14 @@ class MyServer(BaseHTTPRequestHandler):
 
     self.wfile.write(bytes(f"<!DOCTYPE html><html>{header}{body.format(commits=commit_info)}</html>", "utf-8"))
 
-  def dashboard(self):
+  def dashboard(self, showWrappers):
     self.send_response(200)
     self.send_header("Content-type", "text/html")
     self.end_headers()
     images = ""
-    for file in sorted(os.listdir("dashboard")):
-      file_name = file
-      images += f"<img src=\"/dashboard/{file_name}\" style=\"width: 19vw\">"
+    for header_name in headers:
+      if showWrappers or header_name not in wrapper_headers:
+        images += f"<img src=\"/dashboard/{header_name}.png\" style=\"width: 19vw\">"
     self.wfile.write(bytes(f"<!DOCTYPE html><html>{header}{body.format(commits=images)}</html>", "utf-8"))
 
   def dashboard_png(self, pic : str):
@@ -176,8 +176,8 @@ class MyServer(BaseHTTPRequestHandler):
       self.main_page_response()
     elif self.path.startswith('/diff/'):
       self.detailed_commit_info(self.path.removeprefix('/diff/'))
-    elif self.path in ["/dashboard", "/dashboard/"]:
-      self.dashboard()
+    elif self.path in ["/dashboard", "/dashboard/", "/cdashboard", "/cdashboard/"]:
+      self.dashboard(self.path in ["/cdashboard", "/cdashboard/"])
     elif self.path.startswith("/dashboard/"):
       self.dashboard_png(self.path)
     elif self.path.startswith("/raw/"):
