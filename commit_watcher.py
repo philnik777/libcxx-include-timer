@@ -8,10 +8,14 @@ CMakeCommand = 'CC=clang-18 CXX=clang++-18 cmake -G Ninja -DLLVM_ENABLE_RUNTIMES
 
 def generate_time_plots():
   header_info = {}
-  recent_commits = get_recent_commits(125)[::-1]
+  recent_commits = get_recent_commits(200)[::-1]
 
   for commit in recent_commits:
-    table = load_table(commit)
+    try:
+      print(f"Commit: {commit}")
+      table = load_table(commit)
+    except FileNotFoundError:
+      continue
     for (name, row) in zip(table.row_names, table.rows):
       if not name in header_info:
           header_info[name] = []
@@ -45,7 +49,7 @@ while True:
     if os.system(f"(cd repo && rm -rf build/ && mkdir build && cd build && {CMakeCommand} && ninja generate-cxx-headers)") != 0:
       print("libc++ build failed!")
     else:
-      os.system(f"python include_times.py > include_time_db/{commit}")
+      os.system(f"python ../include_times.py > include_time_db/{commit}")
 
   if len(commits) != 0:
     generate_time_plots()
