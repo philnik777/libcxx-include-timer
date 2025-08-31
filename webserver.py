@@ -94,7 +94,7 @@ class MyServer(BaseHTTPRequestHandler):
       self.send_response(200)
       self.send_header("Content-type", "text/html")
       self.end_headers()
-      recent_commits = get_recent_commits(75)
+      recent_commits = get_recent_commits(500)
 
       recent_commits_list = "<table>"
       header_generated = False
