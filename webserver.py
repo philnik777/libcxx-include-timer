@@ -189,6 +189,7 @@ if __name__ == "__main__":
   args = parser.parse_args()
 
   webserver = HTTPServer((hostname, int(args.port)), MyServer)
+  webserver.timout = 10
   print("Server Started!")
 
   webserver.serve_forever()
