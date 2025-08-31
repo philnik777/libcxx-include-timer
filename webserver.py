@@ -1,4 +1,4 @@
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import argparse
 import copy
 import time
@@ -188,7 +188,7 @@ if __name__ == "__main__":
   parser.add_argument("--port", default=80)
   args = parser.parse_args()
 
-  webserver = HTTPServer((hostname, int(args.port)), MyServer)
+  webserver = ThreadingHTTPServer((hostname, int(args.port)), MyServer)
   webserver.timout = 10
   print("Server Started!")
 
