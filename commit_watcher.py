@@ -4,7 +4,7 @@ from utils import run_command, get_recent_commits, load_table
 from matplotlib import pyplot as plt
 import pandas as pd
 
-CMakeCommand = 'CC=clang-18 CXX=clang++-18 cmake -G Ninja -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" ../runtimes'
+CMakeCommand = 'CC=clang-20 CXX=clang++-20 cmake -G Ninja -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" ../runtimes'
 
 def generate_time_plots():
   header_info = {}
