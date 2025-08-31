@@ -24,5 +24,5 @@ for header in headers:
 
   for cxx_version in cxx_versions:
     printerr(f"Benchmarking <{header}>/{cxx_version}" + 20 * " ", end="\r")
-    command = f"clang++-18 -std={cxx_version} -D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES -nostdinc++ {include_paths} ./testfile.cpp -E -P | wc -c"
+    command = f"clang++-20 -std={cxx_version} -D_LIBCPP_REMOVE_TRANSITIVE_INCLUDES -nostdinc++ {include_paths} ./testfile.cpp -E -P | wc -c"
     print(f"{run_command(command)[:-1]}", end="\n" if cxx_version == "c++26" else ",")
