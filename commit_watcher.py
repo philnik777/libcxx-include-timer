@@ -8,7 +8,7 @@ CMakeCommand = 'CC=clang-20 CXX=clang++-20 cmake -G Ninja -DLLVM_ENABLE_RUNTIMES
 
 def generate_time_plots():
   header_info = {}
-  recent_commits = get_recent_commits(200)[::-1]
+  recent_commits = get_recent_commits(1000)[::-1]
 
   for commit in recent_commits:
     try:
